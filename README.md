@@ -26,6 +26,26 @@ interface for creating or updating passwords and other sensitive information.
 - Install Proton Pass CLI from their official documentation, [found here](https://protonpass.github.io/pass-cli/get-started/installation/).
 
 ### Install Pass TUI
+
+#### Option 1: Using the Standalone Executable (Recommended)
+You can download the compiled executable from the [Releases page](https://github.com/jkimble/pass-tui/releases/).
+
+1) Download the `pass-tui` file from the latest release.
+2) Make the file executable:
+   ```sh
+   chmod +x pass-tui
+   ```
+3) (Optional) Move it to your PATH so you can run it from anywhere:
+   ```sh
+   sudo mv pass-tui /usr/local/bin/pass-tui
+   ```
+4) Run the app:
+   ```sh
+   pass-tui
+   # Or ./pass-tui if you didn't move it to your PATH
+   ```
+
+#### Option 2: Running from Source
 1) Clone this repository.
 2) Install dependencies:
    ```sh
