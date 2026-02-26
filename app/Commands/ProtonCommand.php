@@ -180,8 +180,20 @@ abstract class ProtonCommand extends Command
         }
 
         $password = trim($result->output());
-        render("<div class='p-2 text-green-400'>Generated: <span class='font-bold'>{$password}</span></div>");
-        select('Action', ['back' => '⬅️  Go Back']);
+        render("<div class='p-1 text-green-400'>Generated: <span class='font-bold'>{$password}</span></div>");
+
+        $scoreResult = Process::timeout(20)->run(['pass-cli', 'password', 'score', $password, '--output', 'json']);
+
+        if ($scoreResult->successful()) {
+            $scoreData = json_decode($scoreResult->output(), true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($scoreData['password_score'])) {
+                $strength = $scoreData['password_score'];
+                $color = $strength === 'Strong' ? 'green' : 'red';
+                render("<div class='p-1 text-{$color}-400'>Strength: <span class='font-bold'>{$strength}</span></div>");
+            }
+        }
+
+        select('Action', ['back' => 'Exit']);
     }
 
     protected function searchItems(): void
