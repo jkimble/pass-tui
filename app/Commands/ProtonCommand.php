@@ -32,7 +32,7 @@ abstract class ProtonCommand extends Command
 
         $this->clearScreen();
         $this->renderHeader($title);
-        render('<div class="p-2 text-yellow-400">⚠️ You are not logged in to Proton Pass CLI.</div>');
+        render('<div class="mx-2 my-2 p-4 bg-yellow-900 border border-yellow-700 text-yellow-200 rounded shadow">⚠️ You are not logged in to Proton Pass CLI.</div>');
 
         $action = select(
             label: 'Action',
@@ -55,17 +55,19 @@ abstract class ProtonCommand extends Command
         $this->clearScreen();
         $this->renderHeader('Pass TUI: Login');
 
-        render('<div class="p-2 text-gray-300">Launching Proton Pass CLI login flow...</div>');
+        render('<div class="mx-2 mt-2 px-4 py-2 bg-gray-800 text-gray-300 rounded shadow">Launching interactive Proton Pass CLI login flow...</div>');
+        echo "\n";
+        
+        passthru('pass-cli login', $status);
+        echo "\n";
 
-        $result = Process::timeout(0)->run(['pass-cli', 'login']);
-
-        if ($result->failed()) {
-            $this->error("Login failed: " . $result->errorOutput());
+        if ($status !== 0) {
+            render('<div class="mx-2 p-2 text-red-500 font-bold">Login failed or was cancelled.</div>');
             select('Action', ['back' => '⬅️  Go Back']);
             return;
         }
 
-        $this->info('Login complete. Returning...');
+        render('<div class="mx-2 p-2 text-green-400 font-bold">Login complete. Returning...</div>');
         sleep(1);
     }
 
@@ -180,7 +182,10 @@ abstract class ProtonCommand extends Command
         }
 
         $password = trim($result->output());
-        render("<div class='p-1 text-green-400'>Generated: <span class='font-bold'>{$password}</span></div>");
+        render("<div class='mx-2 my-2 p-4 bg-gray-800 rounded shadow text-center'>
+            <div class='text-gray-400 text-sm mb-1'>Generated Password</div>
+            <div class='text-green-400 font-bold text-xl'>{$password}</div>
+        </div>");
 
         $scoreResult = Process::timeout(20)->run(['pass-cli', 'password', 'score', $password, '--output', 'json']);
 
@@ -189,7 +194,8 @@ abstract class ProtonCommand extends Command
             if (json_last_error() === JSON_ERROR_NONE && isset($scoreData['password_score'])) {
                 $strength = $scoreData['password_score'];
                 $color = $strength === 'Strong' ? 'green' : 'red';
-                render("<div class='p-1 text-{$color}-400'>Strength: <span class='font-bold'>{$strength}</span></div>");
+                $bgClass = $strength === 'Strong' ? 'bg-green-900 text-green-200' : 'bg-red-900 text-red-200';
+                render("<div class='mx-2 mb-2 p-2 {$bgClass} rounded shadow text-center'>Strength: <span class='font-bold'>{$strength}</span></div>");
             }
         }
 
@@ -337,9 +343,11 @@ abstract class ProtonCommand extends Command
     protected function renderHeader($title): void
     {
         render(<<<HTML
-            <div class="w-full bg-indigo-900 text-white px-2 py-1">
-                <div class="font-bold">$title</div>
+            <div class="w-full bg-indigo-800 text-white px-4 py-2 flex justify-between shadow-md">
+                <div class="font-bold text-lg">🔒 $title</div>
+                <div class="text-indigo-300 font-bold">Pass-TUI</div>
             </div>
+            <div class="w-full h-1 bg-indigo-500 mb-2"></div>
         HTML);
     }
 

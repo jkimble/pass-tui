@@ -220,17 +220,15 @@ class ListVaults extends ProtonCommand
             if (!$confirm) return;
 
             $data = compact('title', 'username', 'email', 'password', 'url', 'vaultName');
-            spin(
-                $result = function () use ($data) {
-                    $this->createItem($data);
-                },
+            $result = spin(
+                fn() => $this->createItem($data),
                 'Generating login...'
             );
 
             if (!empty($result)) {
-                $this->info("Login created successfully! Redirecting back to {$vaultName}.");
+                render("<div class='mx-2 my-2 px-4 py-2 bg-green-800 text-green-200 rounded'>Login created successfully! Redirecting back to {$vaultName}...</div>");
             } else {
-                $this->error("Error creating login. Redirecting back to {$vaultName}.");
+                render("<div class='mx-2 my-2 px-4 py-2 bg-red-800 text-red-200 rounded'>Error creating login. Redirecting back to {$vaultName}...</div>");
             }
 
             sleep(3);
@@ -260,7 +258,11 @@ class ListVaults extends ProtonCommand
             '--email=' . $email,
             '--password=' . $password,
             '--url=' . $url,
-        ])->throw();
+        ]);
+
+        if ($result->failed()) {
+            return null;
+        }
 
         return $result->output();
     }
